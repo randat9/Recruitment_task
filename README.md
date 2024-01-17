@@ -11,10 +11,13 @@ A tool for analyzing and tracking EUR/PLN, USD/PLN and CHF/PLN exchange rates, u
 - Automatic daily updates.
 ## Technologies
 Python 3.8+
+
 Libraries: Pandas, Requests
 ## Installing and Running
 git clone https://github.com/twoje-repo/CurrencyDataAnalysis.git
+
 cd CurrencyDataAnalysis
+
 python script.py
 ## Usage Example
 ### Downloading Currency Data
