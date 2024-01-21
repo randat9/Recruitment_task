@@ -53,6 +53,26 @@ def fetch_currency_data():
         data['EUR/USD'] = data['EUR/PLN'] / data['USD/PLN']
         data['CHF/USD'] = data['CHF/PLN'] / data['USD/PLN']
     return data
+def prompt_for_date_range():
+    """
+    Prompts the user to enter a custom date range.
+    Returns a tuple (start_date, end_date).
+    """
+    format_str = '%Y-%m-%d'  # The format
+    print("Enter the date range for which you want the data.")
+    start_date_str = input("Enter start date (YYYY-MM-DD): ")
+    end_date_str = input("Enter end date (YYYY-MM-DD): ")
+
+    try:
+        start_date = datetime.strptime(start_date_str, format_str)
+        end_date = datetime.strptime(end_date_str, format_str)
+        if start_date > end_date:
+            raise ValueError("Start date must be before end date.")
+        return start_date.strftime(format_str), end_date.strftime(format_str)
+    except ValueError as e:
+        print(f"Invalid date format or range: {e}")
+        return None, None
+
 def save_data(data, filename):
     """
     Saves the provided data to a CSV file.
@@ -147,14 +167,22 @@ def scheduled_task():
 # Schedule the task
 schedule.every().day.at("12:00").do(scheduled_task)
 
-if __name__ == "__main__":
-    try:
-        currency_data = fetch_currency_data()
+def main():
+    # Zmodyfikowana funkcja main
+    start_date, end_date = prompt_for_date_range()
+    if start_date and end_date:
+        currency_data = fetch_currency_data(start_date, end_date)
         if currency_data is not None:
             save_data(currency_data, 'all_currency_data.csv')
             select_and_save_data(currency_data)
             pair_to_analyze = input("Enter the currency pair you want to analyze: ")
             analyze_currency_pair(currency_data, pair_to_analyze)
+    else:
+        print("Invalid date range provided.")
+
+if __name__ == "__main__":
+    try:
+        main()
     except Exception as e:
         logging.error(f"An error occurred in main execution: {e}")
 
@@ -165,6 +193,5 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         print("Script stopped by user.")
-
 
 
