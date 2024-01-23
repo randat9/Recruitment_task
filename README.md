@@ -26,7 +26,9 @@ git clone https://github.com/twoje-repo/CurrencyDataAnalysis.git
 
 cd CurrencyDataAnalysis
 
-python script.py
+pip install -r requirements.txt
+
+python currency_data_analyzer.py
 ## Usage Example
 ### Downloading Currency Data
 
