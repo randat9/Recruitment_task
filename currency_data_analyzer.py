@@ -61,21 +61,38 @@ class DataSaver:
 
 class UserInterface:
     @staticmethod
+    def prompt_for_custom_date_range():
+        while True:
+            choice = input(
+                "Do you want to enter a custom date range (last 90 days will be used otherwise)? (yes/no): ").strip().lower()
+            if choice in ['yes', 'no']:
+                break
+            print("Please enter 'yes' or 'no'.")
+
+        if choice == 'yes':
+            return UserInterface.prompt_for_date_range()
+        else:
+            end_date = datetime.today().strftime('%Y-%m-%d')
+            start_date = (datetime.today() - timedelta(days=90)).strftime('%Y-%m-%d')
+            return start_date, end_date
+
+    @staticmethod
     def prompt_for_date_range():
         format_str = '%Y-%m-%d'
         print("Enter the date range for which you want the data.")
-        start_date_str = input("Enter start date (YYYY-MM-DD): ")
-        end_date_str = input("Enter end date (YYYY-MM-DD): ")
-        try:
-            start_date = datetime.strptime(start_date_str, format_str)
-            end_date = datetime.strptime(end_date_str, format_str)
-            if start_date > end_date:
-                raise ValueError("Start date must be before end date.")
-            return start_date.strftime(format_str), end_date.strftime(format_str)
-        except ValueError as e:
-            print(f"Invalid date format or range: {e}")
-            return None, None
 
+        while True:
+            try:
+                start_date_str = input("Enter start date (YYYY-MM-DD): ")
+                end_date_str = input("Enter end date (YYYY-MM-DD): ")
+                start_date = datetime.strptime(start_date_str, format_str)
+                end_date = datetime.strptime(end_date_str, format_str)
+
+                if start_date > end_date:
+                    raise ValueError("Start date must be before end date.")
+                return start_date.strftime(format_str), end_date.strftime(format_str)
+            except ValueError as e:
+                print(f"Invalid date format or range: {e}")
     @staticmethod
     def prompt_for_currency_pairs(available_pairs):
         print("Available currency pairs:", ', '.join(available_pairs))
@@ -117,6 +134,7 @@ class SchedulerTask:
     def start_schedule(self):
         schedule.every().day.at("12:00").do(self.scheduled_task)
 
+
 if __name__ == "__main__":
     logger = CurrencyDataLogger('currency_data_log.log')
     fetcher = CurrencyDataFetcher()
@@ -124,16 +142,35 @@ if __name__ == "__main__":
     ui = UserInterface()
     analyzer = CurrencyDataAnalyzer()
 
-    start_date, end_date = ui.prompt_for_date_range()
-    if start_date and end_date:
-        currency_data = fetcher.fetch_data(start_date, end_date)
-        if currency_data is not None:
-            saver.save(currency_data, 'all_currency_data.csv')
-            selected_pairs = ui.prompt_for_currency_pairs(currency_data.columns[1:])
+    # Umożliwienie użytkownikowi wyboru zakresu dat
+    start_date, end_date = ui.prompt_for_custom_date_range()
+
+    # Pobieranie danych walutowych
+    currency_data = fetcher.fetch_data(start_date, end_date)
+    if currency_data is not None:
+        # Zapisywanie pobranych danych do pliku CSV
+        saver.save(currency_data, 'all_currency_data.csv')
+
+        # Pozwalanie użytkownikowi wybrać interesujące go pary walutowe
+        selected_pairs = ui.prompt_for_currency_pairs(currency_data.columns[1:])
+        if selected_pairs:
             filtered_data = currency_data[['Date'] + selected_pairs]
             saver.save(filtered_data, 'selected_currency_data.csv')
+
+            # Analiza dla konkretnej pary walutowej
             pair_to_analyze = input("Enter the currency pair you want to analyze: ")
             analyzer.analyze_currency_pair(currency_data, pair_to_analyze)
 
+    # Uruchomienie zaplanowanego zadania do automatycznej aktualizacji danych
     scheduler = SchedulerTask(fetcher, saver, 'all_currency_data.csv')
     scheduler.start_schedule()
+
+    # Pętla umożliwiająca ciągłe wykonywanie zaplanowanych zadań
+    try:
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Script stopped by user.")
+
+

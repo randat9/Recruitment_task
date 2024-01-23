@@ -46,3 +46,5 @@
 2024-01-21 23:45:17,363 ERROR:An error occurred in main execution: fetch_currency_data() takes 0 positional arguments but 2 were given
 2024-01-22 00:10:20,601 INFO:Data saved to all_currency_data.csv
 2024-01-22 00:10:35,624 INFO:Data saved to selected_currency_data.csv
+2024-01-24 00:14:19,368 INFO:Data saved to all_currency_data.csv
+2024-01-24 00:14:29,762 INFO:Data saved to selected_currency_data.csv
