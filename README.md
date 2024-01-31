@@ -9,6 +9,14 @@ A tool for analyzing and tracking EUR/PLN, USD/PLN and CHF/PLN exchange rates, u
 - Calculation and analysis of EUR/USD and CHF/USD exchange rates.
 - Saving of data to CSV files.
 - Automatic daily updates.
+
+## What's new?
+
+- Support for Missing Data: If the API fails to return data for some days, pandas will automatically include this in the DataFrame as missing data. You can consider additional methods to handle them if necessary.
+
+- Improved User Interaction: The prompt_for_date_range function allows the user to enter a custom date range. The user now has more control over the data they want to retrieve.
+
+- Date Flexibility: The user can now specify the date range for which he or she wants to download data, instead of being limited to a fixed period of 90 days.
 ## Technologies
 Python 3.8+
 
@@ -18,7 +26,9 @@ git clone https://github.com/twoje-repo/CurrencyDataAnalysis.git
 
 cd CurrencyDataAnalysis
 
-python script.py
+pip install -r requirements.txt
+
+python currency_data_analyzer.py
 ## Usage Example
 ### Downloading Currency Data
 
